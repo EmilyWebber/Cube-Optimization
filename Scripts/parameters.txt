@@ -1,5 +1,5 @@
 outer_cube_length = 20
 inner_cube_length = 3
-radius = 10
+radius = 5
 inner_cube_lower_left_corner = 5,5,5
 paint_criteria = {'upper_bound':radius/2, 'lower_bound':radius/8}

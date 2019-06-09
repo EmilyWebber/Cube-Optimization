@@ -13,18 +13,25 @@ def read_params(f_name):
 	return data
 
 
-def get_starting_point(params):
-	return (params['inner_cube_lower_left_corner'])
+def get_upper_bound(params):
+
+	outer_cube = int(params['outer_cube_length'])
+	inner_cube = int(params['inner_cube_length'])
+	radius = int(params['radius'])
+
+	# we'll assume the paint criteria is constant at <= r/2
+	rt = inner_cube + int(radius/2)
+
+	assert(rt<=outer_cube)
+
+	return rt
+
 
 def is_valid(row, col, params):
 	return True
 
 def get_space(row, col, side, params, space_type):
-	return (0,0,0)
-
-
-
-
+	return (row, col, side)
 
 def get_pairs(params):
 
@@ -35,14 +42,13 @@ def get_pairs(params):
 	radius = int(params['radius'])
 
 	# pick starting point to paint
-	starting_point = get_starting_point(params)
+	w_space_upper_bound = get_upper_bound(params)
 
 	for side in range(6):
-		print ("walking down side ", side)
 
-		for row in range(inner_cube_length):
+		for row in range(w_space_upper_bound):
 
-			for col in range(inner_cube_length):
+			for col in range(w_space_upper_bound):
 
 				if is_valid(row, col, params):
 
@@ -55,7 +61,6 @@ def get_pairs(params):
 						pairs[w_space] = []
 
 					pairs[w_space].append(t_space)
-
 
 if __name__ == '__main__':
 	params = read_params('parameters.txt')
