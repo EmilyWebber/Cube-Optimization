@@ -93,14 +93,6 @@ def get_3D(row, col, side, params):
 
 	return x, y, z
 
-def find_matching_tpoints(row, col, side, params):
-
-	t_space = []
-
-	w_space = get_space(row, col, side, params, 'w')
-
-	return row, [col], True
-
 def compute_boundary(params):
 
 	params['sides'] = {1:"front",  2:'right', 3:'back', 4:'left', 5:'top', 6:'bottom' }
