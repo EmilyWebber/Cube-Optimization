@@ -107,6 +107,9 @@ def compute_boundary(params):
 
 	params['start'] = [x_0, y_0, z_0]
 
+	# Need to find the correct starting point 
+	params = find_mins(params)
+
 	return params
 
 def find_mins(params):
@@ -131,7 +134,7 @@ def find_mins(params):
 
 		lowest = v - int(radius/8)
 
-		if lowest >= 0: 
+		if lowest > 0: 
 
 			# get the most space you can
 			max_var = v - int(radius/2)
@@ -149,109 +152,113 @@ def find_mins(params):
 
 	return params
 
-def find_matching_tpoints(w_point, side, params):
-	w1, w2, w3 = w_point[0], w_point[1], w_point[2]
+def get_window(w_point, side, params):
 
-	t_points = []
 	radius = int(params['radius'])
+
 	face = params['sides'][side]
 
-	print ('w point ', w_point, face)
+	w1, w2, w3 = w_point[0], w_point[1], w_point[2]
 
 	max_distance = int(radius/2)
-	min_distance = int(radius/8)
 
-	print ('have a max distance of ', max_distance)
+	min_distance = max(int(radius/8), 1)
+
+	up = params['w_space_upper_bound']
+
+	outer_cube = int(params['outer_cube_length'])
+
+	if face == 'front' or face == 'back':
+		left = max(w1 - max_distance, 0)
+
+		right = min(w1+up-1 + max_distance, outer_cube)
+
+		upwards = min(w3 + max_distance + up-1, outer_cube) 
+
+		down = max(w3-max_distance - (up-1), 0)
+
+	elif face == 'right' or face == 'left':
+
+		left = max(w2 - max_distance, 0)
+
+		right = min(w2+up-1 + max_distance, outer_cube)
+
+		upwards = min(w3 + max_distance + up-1, outer_cube) 
+
+		down = max(w3-max_distance, 0)
+
+	elif face in ['top', 'bottom']:
+		left = max(w1 - max_distance, 0)
+
+		right = min(w1+up-1 + max_distance, outer_cube)
+
+		upwards = min(w2 + max_distance + up-1, outer_cube) 
+
+		down = max(w2-max_distance - (up-1), 0)
+
+	return list(range(left, right+1)), list(range(down, upwards+1))
+
+def get_depth(w_point, side, params):
+	face = params['sides'][side]
+	up = params['w_space_upper_bound']
+	w1, w2, w3 = w_point[0], w_point[1], w_point[2]
+	outer_cube_length = int(params['outer_cube_length'])
+	inside_start = params['inner_cube_lower_left_corner'].split(',')
+
+	x1, y1, z1 = int(inside_start[0]), int(inside_start[1]), int(inside_start[2])
 
 	if face == 'front':
-		# look left
-		window = w1 - max_distance
-
-		if w1 <= params['x_min'] and w1 >= 0:
-
-
-		# look right
-		window = w1 + max_distance
-
-		# look up
-		window = 
-
-		# look down
-		window = 
+		# check y
+		depth = max(w2 - y1,0)
 
 	elif face == 'right':
-		# look left
-		window = w1 - max_distance
-		# if w1 <= params['x_min'] and w1 >= 0:
-
-		# look right
-		window = w1 + 2
-
-		# look up
-		window = 
-
-		# look down
-		window = 
+		# check x
+		depth = min(w1-x1, outer_cube_length)
 
 	elif face == 'back':
-			# look left
-		window = w1 - 2
-		# if w1 <= params['x_min'] and w1 >= 0:
+		# check y
+		depth = min(w2 - y1, outer_cube_length)
 
-		# look right
-		window = w1 + 2
+	elif face == 'left':
+		# check x
+		depth = max(w1-x1, 0)
 
-		# look up
-		window = 
+	elif face == "top":
+		# check z
+		depth = min(w3 -z1 , outer_cube_length)
 
-		# look down
-		window = 
+	elif face == "bottom":
+		# check z
+		depth = max(w3-z1, 0)
 
+	return depth
 
-	elif face = 'left':
-			# look left
-		window = w1 - 2
-		# if w1 <= params['x_min'] and w1 >= 0:
+def find_matching_tpoints(w_point, side, params):
 
-		# look right
-		window = w1 + 2
+	t_points = []
 
-		# look up
-		window = 
+	rows, cols = get_window(w_point, side, params)
 
-		# look down
-		window = 
+	# get distance between outer cube and inner cube
+	depth = get_depth(w_point, side, params)
 
+	# must have at least a depth of 1 to paint
+	if depth == 0:
+		return []
 
-	elif face == 'top':
-		# look left
-		window = w1 - 2
-		# if w1 <= params['x_min'] and w1 >= 0:
+	else:
+		print (depth)
 
-		# look right
-		window = w1 + 2
+	for r in rows:
+		for c in cols:
+			for d in range(depth)
+				t_p = get_point(r,c,d,side)
+	# 			return
 
-		# look up
-		window = 
+				# if in_cube(t_p) and not in_cube(w_point)
+					# t_points.append(p)
 
-		# look down
-		window = 
-
-	elif face == 'botom':
-		# look left
-		window = w1 - 2
-		# if w1 <= params['x_min'] and w1 >= 0:
-
-		# look right
-		window = w1 + 2
-
-		# look up
-		window = 
-
-		# look down
-		window = 
-
-	return []
+	return t_points
 
 
 def get_pairs(params):
@@ -260,9 +267,6 @@ def get_pairs(params):
 
 	up = params['w_space_upper_bound']
 
-	# Need to find the correct starting point 
-	ranges = find_mins(params)
-
 	# loop through the maximum w-space outer bound, and find each corresponding t-space
 	for side in range(1, 7):
 
@@ -270,12 +274,11 @@ def get_pairs(params):
 
 			for col in range(up):
 
-	# 			# reconstruct the single point to 3D
+				# reconstruct the single point to 3D
 				w_point = get_3D(row, col, side, params)
 
 				t_spaces = find_matching_tpoints(w_point, side, params)
 
-				return
 
 				# if len(t_spaces) >= 1:
 
@@ -285,6 +288,8 @@ def get_pairs(params):
 
 				# 	for t in t_spaces:
 				# 		pairs[w_space].append(t
+
+
 
 	return pairs
 
