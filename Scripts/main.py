@@ -373,4 +373,6 @@ if __name__ == '__main__':
 
 	pairs = get_pairs(params)
 
+	print (pairs)
+
 	# write_to_disk(pairs)
