@@ -1,4 +1,3 @@
-import pandas as pd 
 import json
 
 def read_params(f_name):
@@ -11,7 +10,6 @@ def read_params(f_name):
 			else:
 				data[d[0]] = str(d[-2] + d[-1])
 	return data
-
 
 def get_upper_bound(params):
 
@@ -26,45 +24,141 @@ def get_upper_bound(params):
 
 	return rt
 
+def get_3D(row, col, side, params):
+	'''
+	This function reconstructs a given point into 3D space
+		Adds positioning by the lower left corner of the cube
+		Changes per face
+	Position is always: (x,y,z)
+	'''
+	up = params['w_space_upper_bound']
 
-def is_valid(row, col, params):
-	return True
+	x_0, y_0, z_0 = params['start'][0], params['start'][1], params['start'][2]
 
-def get_space(row, col, side, params, space_type):
-	return (row, col, side)
+	face = params['sides'][side]
+
+	if face == 'front':
+
+		x = x_0 + row 
+
+		# Y is constant
+		y = y_0 
+
+		z = z_0 + col
+
+	elif face == 'right':
+
+		# X is constant, subtract 1 for computer indexing
+		x = x_0 + up-1
+
+		y = y_0 + col
+
+		z = z_0 + row
+
+	elif face == 'back':
+
+		x = x_0 + row 
+
+		# Y is constant
+		y = y_0 + up - 1
+
+		z = z_0 + col
+
+	elif face == 'left':
+
+		# x is constant
+		x = x_0 
+
+		y = y_0 + col 
+
+		z = z_0 + row
+
+	elif face == 'top':
+
+		x = x_0 + row
+
+		y = y_0 + col
+
+		z = z_0 + up - 1
+
+	elif face == 'bottom':
+
+		x = x_0 + row
+
+		y = y_0 + col
+
+		z = z_0 - (up- 1)
+
+	if face == 'bottom':
+		print (x, y, z, face)
+
+	return x_0, y_0, z_0
+
+def find_matching_tpoints(row, col, side, params):
+
+	t_space = []
+
+	w_space = get_space(row, col, side, params, 'w')
+
+	return row, [col], True
+
+def compute_boundary(params):
+
+	params['sides'] = {1:"front",  2:'right', 3:'back', 4:'left', 5:'top', 6:'bottom' }
+
+	up = get_upper_bound(params)
+
+	params['w_space_upper_bound'] = up
+
+	start = params['inner_cube_lower_left_corner'].split(',')
+
+	x_0, y_0, z_0 = int(start[0]), int(start[1]), int(start[2])
+
+	params['start'] = [x_0, y_0, z_0]
+
+	return params
+
 
 def get_pairs(params):
 
 	pairs = {}
 
-	inner_cube_length = int(params['inner_cube_length'])
+	up = params['w_space_upper_bound']
 
-	radius = int(params['radius'])
+	# loop through the maximum w-space outer bound, and find each corresponding t-space
+	for side in range(1, 7):
 
-	# pick starting point to paint
-	w_space_upper_bound = get_upper_bound(params)
+		for row in range(up):
 
-	for side in range(6):
+			for col in range(up):
 
-		for row in range(w_space_upper_bound):
+				# reconstruct the single point to 3D
+				w_point = get_3D(row, col, side, params)
 
-			for col in range(w_space_upper_bound):
+				# w_space, t_spaces, valid = find_matching_tpoints(row, col, side, params)
 
-				if is_valid(row, col, params):
+				# if valid:
 
-					w_space = get_space(row, col, side, params, 'w')
+				# 	if w_space not in pairs:
 
-					t_space = get_space(row, col, side, params, 't')
+				# 		pairs[w_space] = []
 
-					if w_space not in pairs:
+				# 	for t in t_spaces:
+				# 		pairs[w_space].append(t
 
-						pairs[w_space] = []
+	return pairs
 
-					pairs[w_space].append(t_space)
+
 
 if __name__ == '__main__':
 	params = read_params('parameters.txt')
 
-	pairs = get_pairs(params)
+	params = compute_boundary(params)
+
+	print ("Walking through a cubed space of {}".format(params['w_space_upper_bound']))
+
+	pirs = get_pairs(params)
 
 	# write_to_disk(pairs)
+
+
