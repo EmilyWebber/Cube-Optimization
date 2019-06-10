@@ -233,6 +233,78 @@ def get_depth(w_point, side, params):
 
 	return depth
 
+def get_t_point(row, col, depth, side, param, w_point):
+	face = params['sides'][side]
+
+	w1, w2, w3 = int(w_point[0]), int(w_point[1]), int(w_point[2])  
+
+	if face == 'front':
+		w2 += depth
+		return row, w2, col
+
+	elif face == 'right':
+		w1 -= depth
+		return w1, row, col
+
+	elif face == 'back':
+		w2 -= depth
+		return row, w2, col
+
+	elif face == "left":
+		w1 += depth
+		return w1, row, col
+
+	elif face == 'top':
+		w3 -= depth
+		return col, row, w3
+
+	elif face == 'bottom':
+		w3 += depth
+		return col, row, w3
+
+def in_cube(point, params, side):
+	face = params['sides'][side]
+
+	x1, y1, z1 = int(point[0]), int(point[1]), int(point[2])
+
+	cube = params['inner_cube_lower_left_corner'].split(',')
+
+	ic_x, ic_y, ic_z = int(cube[0]), int(cube[1]), int(cube[2])
+
+	cube_n = int(params['inner_cube_length'])
+
+	if face == 'front':
+		a = ic_x <= x1 <= (ic_x+(cube_n-1))
+		b = ic_y == y1 
+		c = ic_z <= z1 <= (ic_z + cube_n-1)
+
+	elif face == 'right':
+		a = x1 == (ic_x + (cube_n-1))
+		b = ic_y <= y1 <= (ic_y + cube_n-1) 
+		c = ic_z <= z1 <= (ic_z + cube_n-1)
+
+	elif face == 'back':
+		a = ic_x <= x1 <= (ic_x+(cube_n-1))
+		b = y1 == ic_y + cube_n-1
+		c = ic_z <= z1 <= (ic_z + cube_n-1)
+
+	elif face == 'left':
+		a = ic_x == x1
+		b = ic_y <= y1 <= (ic_y + cube_n-1) 
+		c = ic_z <= z1 <= (ic_z + cube_n-1)
+
+	elif face == 'top':
+		a = ic_x <= x1 <= (ic_x + cube_n-1)
+		b = ic_y <= y1 <= (ic_y + cube_n-1) 
+		c = z1 == ic_z + cube_n-1
+
+	elif face == 'bottom':
+		a = ic_x <= x1 <= (ic_x + cube_n-1)
+		b = ic_y <= y1 <= (ic_y + cube_n-1) 
+		c = z1 == ic_z 
+
+	return a and b and c
+
 def find_matching_tpoints(w_point, side, params):
 
 	t_points = []
@@ -246,17 +318,14 @@ def find_matching_tpoints(w_point, side, params):
 	if depth == 0:
 		return []
 
-	else:
-		print (depth)
-
 	for r in rows:
 		for c in cols:
-			for d in range(depth)
-				t_p = get_point(r,c,d,side)
-	# 			return
+			for d in range(1, depth+1):
 
-				# if in_cube(t_p) and not in_cube(w_point)
-					# t_points.append(p)
+				t_p = get_t_point(r,c,d, side, params, w_point)
+
+				if in_cube(t_p, params, side) and not in_cube(w_point, params, side):
+					t_points.append(t_p)
 
 	return t_points
 
@@ -280,14 +349,14 @@ def get_pairs(params):
 				t_spaces = find_matching_tpoints(w_point, side, params)
 
 
-				# if len(t_spaces) >= 1:
+				if len(t_spaces) >= 1:
 
-				# 	if w_space not in pairs:
+					if w_point not in pairs:
 
-				# 		pairs[w_space] = []
+						pairs[w_point] = []
 
-				# 	for t in t_spaces:
-				# 		pairs[w_space].append(t
+					for t in t_spaces:
+						pairs[w_point].append(t)
 
 
 
@@ -305,9 +374,3 @@ if __name__ == '__main__':
 	pairs = get_pairs(params)
 
 	# write_to_disk(pairs)
-
-
-# TO-DO
-# 1. Implement an in_cube() function
-# 2. Find the spots to search 
-
