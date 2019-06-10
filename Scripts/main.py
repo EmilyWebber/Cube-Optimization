@@ -79,6 +79,7 @@ def get_3D(row, col, side, params):
 
 		y = y_0 + col
 
+		# z is constant
 		z = z_0 + up - 1
 
 	elif face == 'bottom':
@@ -87,12 +88,10 @@ def get_3D(row, col, side, params):
 
 		y = y_0 + col
 
+		# z is constant
 		z = z_0 - (up- 1)
 
-	if face == 'bottom':
-		print (x, y, z, face)
-
-	return x_0, y_0, z_0
+	return x, y, z
 
 def find_matching_tpoints(row, col, side, params):
 
@@ -119,21 +118,69 @@ def compute_boundary(params):
 	return params
 
 
+def find_ranges(params):
+	print (params['start'])
+
+	radius = int(params['radius'])
+	variables = [params['start'][0], params['start'][1], params['start'][2]]
+	strs = ['x', 'y', 'z']
+	# assume the lower bound on distance is radius / 8
+	
+	# if there is not enough space, set range to outer cube length
+	
+	for idx, v in enumerate(variables):
+		var_str = strs[idx]
+		low_key = '{}_min'.format(var_str)
+
+		# Get the absolute minimum required space
+
+		lowest = v - int(radius/8)
+
+		if lowest >= 0: 
+
+			# get the most space you can
+			max_var = v - int(radius/2)
+
+			if max_var > 0:
+				params[low_key] = max_var
+
+			else:
+				params[low_key] = 0
+
+		else:
+
+			# get what's available
+			params[low_key] = 0
+
+		print ('Found a min of ', params['{}_min'.format(var_str)])
+
+
+	
+	# otherwise, set range to radius / 2
+
+
+
+
+
+
 def get_pairs(params):
 
 	pairs = {}
 
 	up = params['w_space_upper_bound']
 
+	# Need to find the correct starting point 
+	ranges = find_ranges(params)
+
 	# loop through the maximum w-space outer bound, and find each corresponding t-space
-	for side in range(1, 7):
+	# for side in range(1, 7):
 
-		for row in range(up):
+	# 	for row in range(up):
 
-			for col in range(up):
+	# 		for col in range(up):
 
-				# reconstruct the single point to 3D
-				w_point = get_3D(row, col, side, params)
+	# 			# reconstruct the single point to 3D
+	# 			w_point = get_3D(row, col, side, params)
 
 				# w_space, t_spaces, valid = find_matching_tpoints(row, col, side, params)
 
