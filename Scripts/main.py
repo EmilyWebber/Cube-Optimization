@@ -33,7 +33,7 @@ def get_3D(row, col, side, params):
 	'''
 	up = params['w_space_upper_bound']
 
-	x_0, y_0, z_0 = params['start'][0], params['start'][1], params['start'][2]
+	x_0, y_0, z_0 = params['x_min'], params['y_min'], params['z_min']
 
 	face = params['sides'][side]
 
@@ -117,9 +117,12 @@ def compute_boundary(params):
 
 	return params
 
-
-def find_ranges(params):
-	print (params['start'])
+def find_mins(params):
+	'''
+	This function finds the minimal starting point for the cube
+		On the lower left side
+	'''
+	outer = int(params['outer_cube_length'])
 
 	radius = int(params['radius'])
 	variables = [params['start'][0], params['start'][1], params['start'][2]]
@@ -152,15 +155,111 @@ def find_ranges(params):
 			# get what's available
 			params[low_key] = 0
 
-		print ('Found a min of ', params['{}_min'.format(var_str)])
+	return params
+
+def find_matching_tpoints(w_point, side, params):
+	w1, w2, w3 = w_point[0], w_point[1], w_point[2]
+
+	t_points = []
+	radius = int(params['radius'])
+	face = params['sides'][side]
+
+	print ('w point ', w_point, face)
+
+	max_distance = int(radius/2)
+	min_distance = int(radius/8)
+
+	print ('have a max distance of ', max_distance)
+
+	if face == 'front':
+		# look left
+		window = w1 - max_distance
+
+		if w1 <= params['x_min'] and w1 >= 0:
 
 
-	
-	# otherwise, set range to radius / 2
+		# look right
+		window = w1 + max_distance
+
+		# look up
+		window = 
+
+		# look down
+		window = 
+
+	elif face == 'right':
+		# look left
+		window = w1 - max_distance
+		# if w1 <= params['x_min'] and w1 >= 0:
+
+		# look right
+		window = w1 + 2
+
+		# look up
+		window = 
+
+		# look down
+		window = 
+
+	elif face == 'back':
+			# look left
+		window = w1 - 2
+		# if w1 <= params['x_min'] and w1 >= 0:
+
+		# look right
+		window = w1 + 2
+
+		# look up
+		window = 
+
+		# look down
+		window = 
 
 
+	elif face = 'left':
+			# look left
+		window = w1 - 2
+		# if w1 <= params['x_min'] and w1 >= 0:
+
+		# look right
+		window = w1 + 2
+
+		# look up
+		window = 
+
+		# look down
+		window = 
 
 
+	elif face == 'top':
+		# look left
+		window = w1 - 2
+		# if w1 <= params['x_min'] and w1 >= 0:
+
+		# look right
+		window = w1 + 2
+
+		# look up
+		window = 
+
+		# look down
+		window = 
+
+	elif face == 'botom':
+		# look left
+		window = w1 - 2
+		# if w1 <= params['x_min'] and w1 >= 0:
+
+		# look right
+		window = w1 + 2
+
+		# look up
+		window = 
+
+		# look down
+		window = 
+
+	return []
 
 
 def get_pairs(params):
@@ -170,21 +269,23 @@ def get_pairs(params):
 	up = params['w_space_upper_bound']
 
 	# Need to find the correct starting point 
-	ranges = find_ranges(params)
+	ranges = find_mins(params)
 
 	# loop through the maximum w-space outer bound, and find each corresponding t-space
-	# for side in range(1, 7):
+	for side in range(1, 7):
 
-	# 	for row in range(up):
+		for row in range(up):
 
-	# 		for col in range(up):
+			for col in range(up):
 
 	# 			# reconstruct the single point to 3D
-	# 			w_point = get_3D(row, col, side, params)
+				w_point = get_3D(row, col, side, params)
 
-				# w_space, t_spaces, valid = find_matching_tpoints(row, col, side, params)
+				t_spaces = find_matching_tpoints(w_point, side, params)
 
-				# if valid:
+				return
+
+				# if len(t_spaces) >= 1:
 
 				# 	if w_space not in pairs:
 
@@ -204,8 +305,12 @@ if __name__ == '__main__':
 
 	print ("Walking through a cubed space of {}".format(params['w_space_upper_bound']))
 
-	pirs = get_pairs(params)
+	pairs = get_pairs(params)
 
 	# write_to_disk(pairs)
 
+
+# TO-DO
+# 1. Implement an in_cube() function
+# 2. Find the spots to search 
 
